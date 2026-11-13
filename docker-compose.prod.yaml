@@ -23,7 +23,7 @@ services:
     networks:
       - laravel-production
     depends_on:
-      php-fpm: 
+      - php-fpm 
     restart: unless-stopped
 
   php-fpm:
