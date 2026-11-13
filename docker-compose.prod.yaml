@@ -61,4 +61,5 @@ volumes:
   laravel-public-assets:
 networks:
   laravel-production: 
+        driver: bridge
    
