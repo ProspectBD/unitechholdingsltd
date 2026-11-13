@@ -1,0 +1,64 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+    ports:
+      - "3014:3000"
+    networks:
+      - laravel-production
+  backend:
+    build:
+      context: ./backend
+      dockerfile: ./docker/production/nginx/Dockerfile
+    volumes:
+      # -----------------------------------------------------------
+      - laravel-storage-production:/var/www/storage
+      - laravel-public-assets:/var/www/public/build
+    networks:
+      - laravel-production
+    ports:
+      # -----------------------------------------------------------
+      - "8891:80"
+    depends_on:
+      - php-fpm
+    restart: unless-stopped
+
+  php-fpm:
+    build:
+      context: ./backend
+      dockerfile: ./docker/common/php-fpm/Dockerfile
+      target: production
+    volumes:
+      - laravel-public-assets:/var/www/public/build
+      - laravel-storage-production:/var/www/storage
+    env_file:
+      - .env
+    networks:
+      - laravel-production
+    restart: unless-stopped
+  db:
+    image: mariadb:10.5.7
+    environment:
+      - MYSQL_ROOT_PASSWORD=app
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=app
+      - MYSQL_DATABASE=unitech_db
+    restart: unless-stopped
+    networks:
+      - laravel-production
+    healthcheck:
+      test:
+        ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-papp"]
+      timeout: 20s
+      retries: 10
+      interval: 10s
+      start_period: 30s 
+
+volumes: 
+  laravel-storage-production:
+  laravel-public-assets:
+networks:
+  laravel-production: 
+   
