@@ -38,6 +38,8 @@ services:
     networks:
       - laravel-production
     restart: unless-stopped
+    depends_on:
+      - db
   db:
     image: mariadb:10.5.7
     environment:
